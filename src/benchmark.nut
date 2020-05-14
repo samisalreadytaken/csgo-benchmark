@@ -1,12 +1,12 @@
 //-----------------------------------------------------------------------
 //------------------- Copyright (c) samisalreadytaken -------------------
 //                       github.com/samisalreadytaken
-//- v1.4.0 --------------------------------------------------------------
+//- v1.4.1 --------------------------------------------------------------
 IncludeScript("vs_library");
 
 // don't overwrite
 if(!("_BM_"in getroottable()))
-	::_BM_ <- { _VER_ = "1.4.0" };;
+	::_BM_ <- { _VER_ = "1.4.1" };;
 
 class::V
 {
@@ -559,19 +559,28 @@ function _BM_::PrintExpl( i = 0 )
 	iRecLast = 1;
 }
 
+function _BM_::__Spawn( v, t )
+{
+	for( local e; e = Entities.FindByClassname(e,t+"_projectile"); )
+	{
+		e.SetOrigin(v);
+		EntFireByHandle(e,"initializespawnfromworld");
+	}
+}
+
 function _BM_::SpawnFlash( v, d )
 {
-	delay("SendToConsole(\"ent_create flashbang_projectile;ent_fire flashbang_projectile setlocalorigin\\\"" + VecToString( v, "", " ", "" ) + "\\\"\")", d);
+	delay("SendToConsole(\"ent_create flashbang_projectile;script _BM_.__Spawn("+VecToString(v)+",\\\"flashbang\\\")\")", d);
 }
 
 function _BM_::SpawnHE( v, d )
 {
-	delay("SendToConsole(\"ent_create hegrenade_projectile;ent_fire hegrenade_projectile setlocalorigin\\\"" + VecToString( v, "", " ", "" ) + "\\\";ent_fire hegrenade_projectile initializespawnfromworld\")", d);
+	delay("SendToConsole(\"ent_create hegrenade_projectile;script _BM_.__Spawn("+VecToString(v)+",\\\"hegrenade\\\")\")", d);
 }
 
 function _BM_::SpawnMolotov( v, d )
 {
-	delay("SendToConsole(\"ent_create molotov_projectile;ent_fire molotov_projectile setlocalorigin\\\"" + VecToString( v, "", " ", "" ) + "\\\";ent_fire molotov_projectile initializespawnfromworld\")", d);
+	delay("SendToConsole(\"ent_create molotov_projectile;script _BM_.__Spawn("+VecToString(v)+",\\\"molotov\\\")\")", d);
 }
 
 function _BM_::SpawnSmoke( v, d )

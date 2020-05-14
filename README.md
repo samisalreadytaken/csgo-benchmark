@@ -5,9 +5,10 @@ Run benchmark on any map.
 
 By default, map data available for:  
 \- `de_dust2` <sup>(44 seconds)</sup>  
-\- `dz_sirocco` <sup>(81.25 seconds)</sup>
+\- `de_cache` <sup>(50 seconds)</sup>  
+\- `dz_sirocco` <sup>(81.25 seconds)</sup>  
 
-[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.0-informational
+[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.1-informational
 
 ## Installation
 Merge the `/csgo/` folder with your `/steamapps/common/Counter-Strike Global Offensive/csgo/` folder.
