@@ -8,7 +8,7 @@ By default, map data available for:
 \- `de_cache` <sup>(50 seconds)</sup>  
 \- `dz_sirocco` <sup>(81.25 seconds)</sup>  
 
-[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.1-informational
+[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.2-informational
 
 ## Installation
 Merge the `/csgo/` folder with your `/steamapps/common/Counter-Strike Global Offensive/csgo/` folder.
@@ -36,7 +36,8 @@ Command             | Description
 ------------------- | -------------------
 `exec benchmark`    | Load the script
 `benchmark`         | Run benchmark
-`bm_stop`           | Force stop the ongoing benchmark
+`bm_start`          | Run benchmark (path only)
+`bm_stop`           | Force stop ongoing benchmark
 ---                 | ---
 `bm_setup`          | Print setup related commands
 ---                 | ---

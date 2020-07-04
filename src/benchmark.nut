@@ -1,12 +1,12 @@
 //-----------------------------------------------------------------------
 //------------------- Copyright (c) samisalreadytaken -------------------
 //                       github.com/samisalreadytaken
-//- v1.4.1 --------------------------------------------------------------
+//- v1.4.2 --------------------------------------------------------------
 IncludeScript("vs_library");
 
 // don't overwrite
 if(!("_BM_"in getroottable()))
-	::_BM_ <- { _VER_ = "1.4.1" };;
+	::_BM_ <- { _VER_ = "1.4.2" };;
 
 class::V
 {
@@ -17,7 +17,8 @@ class::V
 		z = _z;
 	}
 
-	function V(dx=0,dy=0,dz=0)return::Vector(x+dx,y+dy,z+dz);
+	function V(dx=0,dy=0,dz=0)
+		return::Vector(x+dx,y+dy,z+dz);
 
 	x = 0.0;
 	y = 0.0;
@@ -31,7 +32,7 @@ catch(e)
 }
 
 // aliases
-SendToConsole("alias benchmark\"script _BM_.Start()\";alias bm_stop\"script _BM_.Stop()\";alias bm_rec\"script _BM_.Record()\";alias bm_timer\"script _BM_.ToggleCounter()\";alias bm_setup\"script _BM_.PrintSetupCmd()\";alias bm_list\"script _BM_.ListSetupData()\";alias bm_clear\"script _BM_.ClearSetupData()\";alias bm_remove\"script _BM_.RemoveSetupData()\"");
+SendToConsole("alias benchmark\"script _BM_.Start()\";alias bm_start\"script _BM_.Start(1)\";alias bm_stop\"script _BM_.Stop()\";alias bm_rec\"script _BM_.Record()\";alias bm_timer\"script _BM_.ToggleCounter()\";alias bm_setup\"script _BM_.PrintSetupCmd()\";alias bm_list\"script _BM_.ListSetupData()\";alias bm_clear\"script _BM_.ClearSetupData()\";alias bm_remove\"script _BM_.RemoveSetupData()\"");
 
 SendToConsole("alias bm_mdl\"script _BM_.PrintMDL()\";alias bm_mdl1\"script _BM_.PrintMDL(1)\";alias bm_flash\"script _BM_.PrintFlash()\";alias bm_flash1\"script _BM_.PrintFlash(1)\";alias bm_he\"script _BM_.PrintHE()\";alias bm_he1\"script _BM_.PrintHE(1)\";alias bm_molo\"script _BM_.PrintMolo()\";alias bm_molo1\"script _BM_.PrintMolo(1)\";alias bm_smoke\"script _BM_.PrintSmoke()\";alias bm_smoke1\"script _BM_.PrintSmoke(1)\";alias bm_expl\"script _BM_.PrintExpl()\";alias bm_expl1\"script _BM_.PrintExpl(1)\"\"");
 
@@ -219,7 +220,7 @@ function _BM_::CheckData()
 	return data;
 }
 
-function _BM_::Start()
+function _BM_::Start(bPathOnly = 0)
 {
 	if( bStartedPending )
 		return Msg("Benchmark has not started yet.");
@@ -241,8 +242,9 @@ function _BM_::Start()
 	::EntFireByHandle(hStrip, "use", "", 0, ::HPlayer);
 	::HPlayer.SetHealth(1337);
 
-	if( "Setup_" + sMapName in this )
-		this["Setup_" + sMapName]();
+	if( !bPathOnly )
+		if( "Setup_" + sMapName in this )
+			this["Setup_" + sMapName]();;
 
 	bStartedPending = true;
 	iDev = ::GetDeveloperLevel();
@@ -264,7 +266,7 @@ function _BM_::Start()
 
 	//--------------------------------------------------------------
 
-	::SendToConsole("r_cleardecals;clear;echo;echo;echo;echo\"   Starting in 3 seconds.\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo;echo;developer 0;toggleconsole;fadeout");
+	::SendToConsole("r_cleardecals;clear;echo;echo;echo;echo\"   Starting in 3 seconds...\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo;echo;developer 0;toggleconsole;fadeout");
 
 	::delay("::_BM_._Start()", 3.5);
 }
@@ -276,7 +278,7 @@ function _BM_::_Start()
 	flTimeStart = ::Time();
 	::EntFireByHandle(hCam, "enable", "", 0, ::HPlayer);
 	::EntFireByHandle(hThink, "enable");
-	::SendToConsole("fadein;fps_max 0;bench_start;bench_end;clear;echo;echo;echo;echo\"   Benchmark has started\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo");
+	::SendToConsole("fadein;fps_max 0;bench_start;bench_end;host_framerate 0;host_timescale 1;clear;echo;echo;echo;echo\"   Benchmark has started\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo");
 }
 
 // i == 0 : force stopped
@@ -295,10 +297,10 @@ function _BM_::Stop(i = 0)
 	::EntFireByHandle(hThink, "disable");
 	ToggleCounter(0);
 
-	::SendToConsole("host_timescale 1;clear;echo;echo;echo;echo\"----------------------------\";echo;echo " +
+	::SendToConsole("host_framerate 0;host_timescale 1;clear;echo;echo;echo;echo\"----------------------------\";echo;echo " +
 
 		( i ? "Benchmark finished." :
-		"Stopped benchmark.;echo;mp_restartgame 1;toggleconsole" )
+		"Stopped benchmark.;mp_restartgame 1;toggleconsole" )
 
 	+";echo;echo\"Map: " + sMapName + "\";echo\"Tickrate: "+ fTickrate + "\";echo;toggleconsole" + ";echo\"Time: " + (::Time()-flTimeStart) + " seconds\";echo;bench_end;echo;echo\"----------------------------\";echo;echo;developer " + iDev);
 
@@ -343,7 +345,9 @@ function _BM_::WelcomeMsg()
 //
 //Console commands:
 //
-//benchmark  : Run the benchmark
+//benchmark  : Run benchmark
+//           :
+//bm_start   : Run benchmark (path only)
 //bm_stop    : Force stop the ongoing benchmark
 //           :
 //bm_setup   : Print setup related commands
@@ -360,7 +364,7 @@ function _BM_::WelcomeMsg()
 //[i] The benchmark sets your fps_max to 0
 //")
 
-	Msg("\n\n\n   [v"+_VER_+"]     github.com/samisalreadytaken/csgo-benchmark\n\nConsole commands:\n\nbenchmark  : Run the benchmark\nbm_stop    : Force stop the ongoing benchmark\n           :\nbm_setup   : Print setup related commands\n\n----------\n\nCommands to display FPS:\n\ncl_showfps 1\nnet_graph 1\n\n----------\n\n[i] The benchmark sets your fps_max to 0\n");
+	Msg("\n\n\n   [v"+_VER_+"]     github.com/samisalreadytaken/csgo-benchmark\n\nConsole commands:\n\nbenchmark  : Run benchmark\n           :\nbm_start   : Run benchmark (path only)\nbm_stop    : Force stop ongoing benchmark\n           :\nbm_setup   : Print setup related commands\n\n----------\n\nCommands to display FPS:\n\ncl_showfps 1\nnet_graph 1\n\n----------\n\n[i] The benchmark sets your fps_max to 0\n");
 	Msg("[i] Map: " + sMapName);
 	Msg("[i] Server tickrate: " + fTickrate + "\n\n");
 
@@ -585,12 +589,12 @@ function _BM_::SpawnMolotov( v, d )
 
 function _BM_::SpawnSmoke( v, d )
 {
-	delay("local v=" + VecToString(v) + ";DispatchParticleEffect(\"explosion_smokegrenade\",v,Vector(1,0,0));::_BM_.hCounter.SetOrigin(v);::_BM_.hCounter.EmitSound(\"BaseSmokeEffect.Sound\")", d);
+	delay("local v=" + VecToString(v) + ";DispatchParticleEffect(\"explosion_smokegrenade\",v,Vector(1,0,0));_BM_.hHudHint.SetOrigin(v);_BM_.hHudHint.EmitSound(\"BaseSmokeEffect.Sound\")", d);
 }
 
 function _BM_::SpawnExplosion( v, d )
 {
-	delay("local v=" + VecToString(v) + ";DispatchParticleEffect(\"explosion_c4_500\",v,Vector());::_BM_.hCounter.SetOrigin(v);::_BM_.hCounter.EmitSound(\"c4.explode\")", d);
+	delay("local v=" + VecToString(v) + ";DispatchParticleEffect(\"explosion_c4_500\",v,Vector());_BM_.hHudHint.SetOrigin(v);_BM_.hHudHint.EmitSound(\"c4.explode\")", d);
 }
 
 function _BM_::SpawnMDL( v, a, m, p = 0 )
