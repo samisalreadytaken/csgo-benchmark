@@ -25,7 +25,7 @@ On Windows 10 17063 or later, run the [`install_csgo-benchmark.bat`](https://raw
 **Method 3.**
 In bash, after changing the directory below to your Steam game library directory, use the following commands to install the script into your game files.
 ```
-cd "C:/Program Files/Steam/steamapps/common/Counter-Strike Global Offensive/" && 
+cd "C:/Program Files/Steam/steamapps/common/Counter-Strike Global Offensive/" &&
 curl https://codeload.github.com/samisalreadytaken/csgo-benchmark/tar.gz/master | tar -xz --strip=1 csgo-benchmark-master/csgo
 ```
 
@@ -38,8 +38,12 @@ Command             | Description
 `benchmark`         | Run benchmark
 `bm_start`          | Run benchmark (path only)
 `bm_stop`           | Force stop ongoing benchmark
----                 | ---
-`bm_setup`          | Print setup related commands
+
+Setup commands used for creating map data:
+
+Command             | Description
+------------------- | -------------------
+`bm_setup`          | Print setup commands
 ---                 | ---
 `bm_timer`          | Toggle counter
 `bm_list`           | Print saved setup data
