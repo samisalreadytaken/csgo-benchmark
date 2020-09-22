@@ -1,31 +1,17 @@
 //-----------------------------------------------------------------------
 //------------------- Copyright (c) samisalreadytaken -------------------
 //                       github.com/samisalreadytaken
-//- v1.4.2 --------------------------------------------------------------
+//- v1.4.3 --------------------------------------------------------------
 IncludeScript("vs_library");
 
-// don't overwrite
 if(!("_BM_"in getroottable()))
-	::_BM_ <- { _VER_ = "1.4.2" };;
+	::_BM_ <- { _VER_ = "1.4.3" };;
 
-class::V
-{
-	constructor(_x=0,_y=0,_z=0)
-	{
-		x = _x;
-		y = _y;
-		z = _z;
-	}
+local __init__ = function(){
 
-	function V(dx=0,dy=0,dz=0)
-		return::Vector(x+dx,y+dy,z+dz);
+V <- ::Vector;
 
-	x = 0.0;
-	y = 0.0;
-	z = 0.0;
-}
-
-try(IncludeScript("benchmark_res",_BM_))
+try(IncludeScript("benchmark_res",this))
 catch(e)
 {
 	return Msg("ERROR: Could not find the benchmark resource file.\n");
@@ -42,34 +28,32 @@ SendToConsole("clear;script _BM_.PostSpawn()");
 
 VS.GetLocalPlayer();
 
-// don't overwrite
-if(!("bStarted" in _BM_))
+if( !("bStarted" in this) )
 {
-	_BM_.FTIME <- 0.015625;
-	_BM_.Msg <- printl;
-	_BM_.fTickrate <- VS.GetTickrate();
-	_BM_.sMapName <- split(GetMapName(),"/").top();
-	_BM_.bStartedPending <- false;
-	_BM_.bStarted <- false;
-	_BM_.flTimeStart <- 0.0;
-	_BM_.iDev <- 0;
-	_BM_.iRecLast <- 0;
-	_BM_.nCounterCount <- 0;
-	_BM_.list_models <- [];
-	_BM_.list_nades <- [];
+	FTIME <- 0.015625;
+	Msg <- printl;
+	sMapName <- split(GetMapName(),"/").top();
+	bStartedPending <- false;
+	bStarted <- false;
+	flTimeStart <- 0.0;
+	iDev <- 0;
+	iRecLast <- 0;
+	nCounterCount <- 0;
+	list_models <- [];
+	list_nades <- [];
 };;
 
-if( !("hThink" in _BM_) )
+if( !("hThink" in this) )
 {
-	_BM_.hStrip <- VS.CreateEntity("game_player_equip",{ spawnflags = 1<<1 },1).weakref();
-	_BM_.hHudHint <- VS.CreateEntity("env_hudhint",null,1).weakref();
-	_BM_.hCam <- VS.CreateEntity("point_viewcontrol",{ spawnflags = 1<<3 }).weakref();
-	_BM_.hThink <- VS.Timer(1,_BM_.FTIME,null,null,1,1).weakref();
-	_BM_.hCounter <- VS.Timer(1,1,null,null,0,1).weakref();
+	hStrip <- VS.CreateEntity("game_player_equip",{ spawnflags = 1<<1 },1).weakref();
+	hHudHint <- VS.CreateEntity("env_hudhint",null,1).weakref();
+	hCam <- VS.CreateEntity("point_viewcontrol",{ spawnflags = 1<<3 }).weakref();
+	hThink <- VS.Timer(1,FTIME,null,null,1,1).weakref();
+	hCounter <- VS.Timer(1,1,null,null,0,1).weakref();
 
 	// init vars
-	local sc = _BM_.hThink.GetScriptScope();
-	sc.cam <- _BM_.hCam.weakref();
+	local sc = hThink.GetScriptScope();
+	sc.cam <- hCam.weakref();
 	sc.pos <- null;
 	sc.ang <- null;
 	sc.lim <- null;
@@ -78,8 +62,7 @@ if( !("hThink" in _BM_) )
 
 //--------------------------------------------------------------
 
-// Process large data by splitting it into chunks, recursively process the chunks
-function _BM_::__LoadData()
+function __LoadData()
 {
 	local c1 = "l_" + sMapName;
 
@@ -91,61 +74,10 @@ function _BM_::__LoadData()
 	if( !("pos" in data) || !("ang" in data) || !data.pos.len() || !data.ang.len() )
 		return __LoadData_clf();
 
-	_data <- data.weakref();
-	_LIM <- data.pos.len();
-	_STP <- 1450;
-	_IDX <- 0;
-	_CMX <- ::clamp(_STP, 0, _LIM);
-
-	__LoadData_pos();
+	__LoadData_load(data);
 }
 
-function _BM_::__LoadData_pos()
-{
-	local lp = _data.pos;
-
-	for( local i = _IDX; i < _CMX; ++i )
-		lp[i] = lp[i].V();
-
-	_IDX += _STP;
-	_CMX = ::clamp(_CMX + _STP, 0, _LIM);
-
-	// next
-	if( _IDX >= _CMX )
-	{
-		_IDX = 0;
-		_CMX = ::clamp(_STP, 0, _LIM);
-		return __LoadData_ang();
-	};
-
-	return::delay("::_BM_.__LoadData_pos()", FTIME);
-}
-
-function _BM_::__LoadData_ang()
-{
-	local la = _data.ang;
-
-	for( local i = _IDX; i < _CMX; ++i )
-		la[i] = la[i].V();
-
-	_IDX += _STP;
-	_CMX = ::clamp(_CMX + _STP, 0, _LIM);
-
-	// complete
-	if( _IDX >= _CMX )
-	{
-		delete _LIM;
-		delete _STP;
-		delete _IDX;
-		delete _CMX;
-		__LoadData_load(delete _data);
-		return __LoadData_clf();
-	};
-
-	return::delay("::_BM_.__LoadData_ang()", FTIME);
-}
-
-function _BM_::__LoadData_load(data)
+function __LoadData_load(data)
 {
 	// this can be done here because this script will only play the benchmark data,
 	// which can only be loaded by reloading the whole script
@@ -156,21 +88,26 @@ function _BM_::__LoadData_load(data)
 }
 
 // clear functions
-function _BM_::__LoadData_clf()
+function __LoadData_clf()
 {
 	delete __LoadData;
-	delete __LoadData_pos;
-	delete __LoadData_ang;
 	delete __LoadData_clf;
 	delete __LoadData_load;
 }
 
 //--------------------------------------------------------------
 
-function _BM_::PlaySound(s) ::HPlayer.EmitSound(s);
-function _BM_::Hint(s) ::VS.ShowHudHint(hHudHint,::HPlayer,s);
+function PlaySound(s)
+{
+	return::HPlayer.EmitSound(s);
+}
 
-function _BM_::ToggleCounter(i = null)
+function Hint(s)
+{
+	return::VS.ShowHudHint(hHudHint,::HPlayer,s);
+}
+
+function ToggleCounter(i = null)
 {
 	// toggle
 	if( i == null )
@@ -182,13 +119,13 @@ function _BM_::ToggleCounter(i = null)
 	::EntFireByHandle(hCounter, i ? "enable" : "disable");
 }
 
-VS.OnTimer(_BM_.hCounter, function()
+VS.OnTimer(hCounter, function()
 {
 	Hint(++nCounterCount);
 	PlaySound("UIPanorama.container_countdown");
-},_BM_);
+},this);
 
-VS.OnTimer(_BM_.hThink,function()
+VS.OnTimer(hThink,function()
 {
 	cam.SetOrigin(pos[idx]);
 	local a = ang[idx];
@@ -197,12 +134,14 @@ VS.OnTimer(_BM_.hThink,function()
 		::_BM_.Stop(1);
 },null,true);
 
-function _BM_::Record()
+function Record()
 {
-	Msg("\nRecording is not available in the benchmark script.\nUse the keyframes script to create smooth paths:\n                github.com/samisalreadytaken/keyframes\n");
+	Msg("Recording is not available in the benchmark script.");
+	Msg("Use the keyframes script to create smooth paths:");
+	Msg("                github.com/samisalreadytaken/keyframes");
 }
 
-function _BM_::CheckData()
+function CheckData()
 {
 	local c1 = "l_" + sMapName;
 
@@ -220,7 +159,7 @@ function _BM_::CheckData()
 	return data;
 }
 
-function _BM_::Start(bPathOnly = 0)
+function Start(bPathOnly = 0)
 {
 	if( bStartedPending )
 		return Msg("Benchmark has not started yet.");
@@ -259,7 +198,7 @@ function _BM_::Start(bPathOnly = 0)
 	::delay("::_BM_.Hint(\"Starting in 3...\");::_BM_.PlaySound(\"Alert.WarmupTimeoutBeep\")", 0.5);
 	::delay("::_BM_.Hint(\"Starting in 2...\");::_BM_.PlaySound(\"Alert.WarmupTimeoutBeep\")", 1.5);
 	::delay("::_BM_.Hint(\"Starting in 1...\");::_BM_.PlaySound(\"Alert.WarmupTimeoutBeep\")", 2.5);
-	::delay("::_BM_.Hint(\"Started...\")", 3.5);
+	::VS.HideHudHint(hHudHint,::HPlayer,3.5);
 
 	::delay("::_BM_.PlaySound(\"Weapon_AWP.BoltForward\")", 0.5);
 	PlaySound("Weapon_AWP.BoltBack");
@@ -271,7 +210,7 @@ function _BM_::Start(bPathOnly = 0)
 	::delay("::_BM_._Start()", 3.5);
 }
 
-function _BM_::_Start()
+function _Start()
 {
 	bStartedPending = false;
 	bStarted = true;
@@ -283,7 +222,7 @@ function _BM_::_Start()
 
 // i == 0 : force stopped
 // i == 1 : path completed
-function _BM_::Stop(i = 0)
+function Stop(i = 0)
 {
 	if( !bStarted )
 		return Msg("Benchmark is not running.");
@@ -302,7 +241,7 @@ function _BM_::Stop(i = 0)
 		( i ? "Benchmark finished." :
 		"Stopped benchmark.;mp_restartgame 1;toggleconsole" )
 
-	+";echo;echo\"Map: " + sMapName + "\";echo\"Tickrate: "+ fTickrate + "\";echo;toggleconsole" + ";echo\"Time: " + (::Time()-flTimeStart) + " seconds\";echo;bench_end;echo;echo\"----------------------------\";echo;echo;developer " + iDev);
+	+";echo;echo\"Map: " + sMapName + "\";echo\"Tickrate: "+ VS.GetTickrate() + "\";echo;toggleconsole" + ";echo\"Time: " + (::Time()-flTimeStart) + " seconds\";echo;bench_end;echo;echo\"----------------------------\";echo;echo;developer " + iDev);
 
 	if(i) PlaySound("Buttons.snd9");
 	PlaySound("UIPanorama.gameover_show");
@@ -311,7 +250,7 @@ function _BM_::Stop(i = 0)
 	Hint("Results are printed in the console.");
 }
 
-function _BM_::PostSpawn()
+function PostSpawn()
 {
 	__LoadData();
 
@@ -325,7 +264,7 @@ function _BM_::PostSpawn()
 	::Chat(::txt.blue+" --------------------------------");
 	::Chat("");
 	::Chat(::txt.lightgreen + "[Benchmark Script v"+_VER_+"]");
-	::Chat(::txt.orange + "● " + ::txt.grey +"Server tickrate: " + ::txt.yellow + fTickrate);
+	::Chat(::txt.orange + "● " + ::txt.grey +"Server tickrate: " + ::txt.yellow + VS.GetTickrate());
 	::Chat("");
 	::Chat(::txt.blue+" --------------------------------");
 
@@ -337,7 +276,7 @@ function _BM_::PostSpawn()
 	delete PostSpawn;
 }
 
-function _BM_::WelcomeMsg()
+function WelcomeMsg()
 {
 //Msg(@"
 //
@@ -348,7 +287,7 @@ function _BM_::WelcomeMsg()
 //benchmark  : Run benchmark
 //           :
 //bm_start   : Run benchmark (path only)
-//bm_stop    : Force stop the ongoing benchmark
+//bm_stop    : Force stop ongoing benchmark
 //           :
 //bm_setup   : Print setup related commands
 //
@@ -365,13 +304,14 @@ function _BM_::WelcomeMsg()
 //")
 
 	Msg("\n\n\n   [v"+_VER_+"]     github.com/samisalreadytaken/csgo-benchmark\n\nConsole commands:\n\nbenchmark  : Run benchmark\n           :\nbm_start   : Run benchmark (path only)\nbm_stop    : Force stop ongoing benchmark\n           :\nbm_setup   : Print setup related commands\n\n----------\n\nCommands to display FPS:\n\ncl_showfps 1\nnet_graph 1\n\n----------\n\n[i] The benchmark sets your fps_max to 0\n");
-	Msg("[i] Map: " + sMapName);
-	Msg("[i] Server tickrate: " + fTickrate + "\n\n");
 
-	if( !VS.IsInteger(128.0/fTickrate) )
+	Msg("[i] Map: " + sMapName);
+	Msg("[i] Server tickrate: " + VS.GetTickrate() + "\n\n");
+
+	if( !VS.IsInteger(128.0/VS.GetTickrate()) )
 	{
-		Msg("[!] Invalid tickrate (" + fTickrate + ")! Only 128 and 64 ticks are supported.");
-		Chat(txt.red+"[!] "+txt.white+"Invalid tickrate ( " +txt.yellow+ fTickrate +txt.white+" )! Only 128 and 64 ticks are supported.");
+		Msg(format("[!] Invalid tickrate (%.1f)! Only 128 and 64 tickrates are supported.",VS.GetTickrate()));
+		Chat(format("%s[!] %sInvalid tickrate ( %s%.1f%s )! Only 128 and 64 tickrates are supported.", txt.red, txt.white, txt.yellow, VS.GetTickrate(), txt.white));
 	};
 
 	if( !CheckData() )
@@ -381,7 +321,7 @@ function _BM_::WelcomeMsg()
 }
 
 // bm_setup
-function _BM_::PrintSetupCmd()
+function PrintSetupCmd()
 {
 //Msg(@"
 //
@@ -416,7 +356,7 @@ function _BM_::PrintSetupCmd()
 }
 
 // bm_clear
-function _BM_::ClearSetupData()
+function ClearSetupData()
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	list_models.clear();
@@ -425,7 +365,7 @@ function _BM_::ClearSetupData()
 }
 
 // bm_remove
-function _BM_::RemoveSetupData()
+function RemoveSetupData()
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	if( !iRecLast )
@@ -445,7 +385,7 @@ function _BM_::RemoveSetupData()
 }
 
 // bm_list
-function _BM_::ListSetupData()
+function ListSetupData()
 {
 	PlaySound("UIPanorama.XP.Ticker");
 
@@ -462,7 +402,7 @@ function _BM_::ListSetupData()
 }
 
 // bm_mdl
-function _BM_::PrintMDL( i = 0 )
+function PrintMDL( i = 0 )
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	local a = "SpawnMDL( "+VecToString(HPlayer.GetOrigin())+","+HPlayer.GetAngles().y+", MDL.ST6k )";
@@ -481,7 +421,7 @@ function _BM_::PrintMDL( i = 0 )
 }
 
 // bm_flash
-function _BM_::PrintFlash( i = 0 )
+function PrintFlash( i = 0 )
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	local a = "SpawnFlash( "+VecToString(HPlayer.GetOrigin())+", 0.0 )";
@@ -500,7 +440,7 @@ function _BM_::PrintFlash( i = 0 )
 }
 
 // bm_he
-function _BM_::PrintHE( i = 0 )
+function PrintHE( i = 0 )
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	local a = "SpawnHE( "+VecToString(HPlayer.GetOrigin())+", 0.0 )";
@@ -519,7 +459,7 @@ function _BM_::PrintHE( i = 0 )
 }
 
 // bm_molo
-function _BM_::PrintMolo( i = 0 )
+function PrintMolo( i = 0 )
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	local a = "SpawnMolotov( "+VecToString(HPlayer.GetOrigin())+", 0.0 )";
@@ -538,7 +478,7 @@ function _BM_::PrintMolo( i = 0 )
 }
 
 // bm_smoke
-function _BM_::PrintSmoke( i = 0 )
+function PrintSmoke( i = 0 )
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	local a = "SpawnSmoke( "+VecToString(HPlayer.GetOrigin())+", 0.0 )";
@@ -551,7 +491,7 @@ function _BM_::PrintSmoke( i = 0 )
 }
 
 // bm_expl
-function _BM_::PrintExpl( i = 0 )
+function PrintExpl( i = 0 )
 {
 	PlaySound("UIPanorama.XP.Ticker");
 	local a = "SpawnExplosion( "+VecToString(HPlayer.GetOrigin())+", 0.0 )";
@@ -563,7 +503,7 @@ function _BM_::PrintExpl( i = 0 )
 	iRecLast = 1;
 }
 
-function _BM_::__Spawn( v, t )
+function __Spawn( v, t )
 {
 	for( local e; e = Entities.FindByClassname(e,t+"_projectile"); )
 	{
@@ -572,32 +512,32 @@ function _BM_::__Spawn( v, t )
 	}
 }
 
-function _BM_::SpawnFlash( v, d )
+function SpawnFlash( v, d )
 {
 	delay("SendToConsole(\"ent_create flashbang_projectile;script _BM_.__Spawn("+VecToString(v)+",\\\"flashbang\\\")\")", d);
 }
 
-function _BM_::SpawnHE( v, d )
+function SpawnHE( v, d )
 {
 	delay("SendToConsole(\"ent_create hegrenade_projectile;script _BM_.__Spawn("+VecToString(v)+",\\\"hegrenade\\\")\")", d);
 }
 
-function _BM_::SpawnMolotov( v, d )
+function SpawnMolotov( v, d )
 {
 	delay("SendToConsole(\"ent_create molotov_projectile;script _BM_.__Spawn("+VecToString(v)+",\\\"molotov\\\")\")", d);
 }
 
-function _BM_::SpawnSmoke( v, d )
+function SpawnSmoke( v, d )
 {
 	delay("local v=" + VecToString(v) + ";DispatchParticleEffect(\"explosion_smokegrenade\",v,Vector(1,0,0));_BM_.hHudHint.SetOrigin(v);_BM_.hHudHint.EmitSound(\"BaseSmokeEffect.Sound\")", d);
 }
 
-function _BM_::SpawnExplosion( v, d )
+function SpawnExplosion( v, d )
 {
 	delay("local v=" + VecToString(v) + ";DispatchParticleEffect(\"explosion_c4_500\",v,Vector());_BM_.hHudHint.SetOrigin(v);_BM_.hHudHint.EmitSound(\"c4.explode\")", d);
 }
 
-function _BM_::SpawnMDL( v, a, m, p = 0 )
+function SpawnMDL( v, a, m, p = 0 )
 {
 	if( !Entities.FindByClassnameNearest( "prop_dynamic_override", v, 1 ) )
 	{
@@ -630,3 +570,5 @@ function _BM_::SpawnMDL( v, a, m, p = 0 )
 		};
 	};
 }
+
+}.call(_BM_);

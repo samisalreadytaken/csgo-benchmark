@@ -1,0 +1,144 @@
+
+	github.com/samisalreadytaken/csgo-benchmark
+
+--------------------------------
+
+2020-09-18 [v1.4.3]
+- Removed the "Started..." message after countdown
+- Minor cleanup
+
+2020-07-04 [v1.4.2]
+- Added bm_start command to run the benchmark without executing the setup
+- Fixed a bug with smoke and explosion position and sounds
+- Added the keyframe data to the src
+
+2020-05-14 [v1.4.1]
+- Added de_cache data
+
+2020-05-12 [v1.4.0]
+- Complete rework and cleanup
+
+--------------------------------
+
+2020-04-29 [v1.3.3]
+- Fixed a bug introduced in the last update. (#1)
+
+2020-04-25 [v1.3.2]
+- Minor edits to conform to library changes.
+
+2020-04-10 [v1.3.1]
+- Replaced the sirocco path data with a smooth path.
+
+2020-02-15 [v1.3.0]
+- Removed the keyframe system. The advanced standalone 'keyframes' script data should be used instead.
+  - Get it here: github.com/samisalreadytaken/keyframes
+- Recompiled the dust2 data
+
+2020-02-09
+- Fixed keyframe interpolation bugs
+- Changed data format
+- Bug fixes
+
+2020-01-24
+- More bug fixes
+
+2020-01-22
+- Hotfix
+
+2020-01-20
+- Made show functions togglable
+
+2020-01-17
+- Minor bugfix related to data saving
+
+2020-01-15
+- Added an experimental interpolation algorithm.
+- Cleared up old code, minor improvements.
+- Reformatted the Dust2 angle data.
+
+2020-01-10
+- Minor improvements on the keyframe compilation algorithm.
+- Minor fixes
+- Removed position only recording.
+
+2020-01-08
+- Improved keyframe compilation algorithm.
+- Updated vs_library to allow working with larger data sizes.
+
+2020-01-05
+- New playback method that gets rid of the screen jitter. The data is also adjusted accordingly.
+- Spawned models can now be posed with a selection of poses.
+- Added advanced keyframe smoothing.
+  - Replaced the Dust2 data with a smooth path, using the newly added interpolation method.
+
+2019-12-31
+- Minor fix to conform to library changes.
+
+2019-12-22
+- Minor fix
+- Saving a recording now prints out the exported file name.
+  - '* Recorded data is exported: /csgo/benchmark_rec_e95b6aed110.log'
+
+2019-12-18
+- Added recording trimming to trim non-integer length recordings. E.g. 10.0734 seconds -> 10.0 seconds
+  - Commands: 'bm_trim' and 'bm_trim_undo'
+- Trimmed the default recordings de_dust and dz_sirocco.
+Previously 49.0781 and 58.6406 seconds long, now 49 and 58.
+
+2019-12-14
+- Changed output formatting
+- Fixed a bug introduced in a recent update.
+- 'Player is joining TEAM' message is no longer shown when the script is executed when not in a team.
+
+2019-12-12
+- Smaller data sizes
+- Fixed bouncing while playing recordings
+
+2019-12-08
+- Fixed issues with data saving
+- Changed some of the dust2 playermodels to the new models
+
+2019-12-06
+- Fixed tickrate calculations
+
+2019-11-19
+- New playermodels
+- Changed de_dust2 T playermodels to Leet Krew
+
+2019-11-14
+- Fixed issues with player teams*
+- Fixed a typo*
+
+*: Thanks MrMaxim! (youtube.com/watch?v=jEOXLj6XtaQ)
+
+2019-11-13
+- Fixed issues with server tickrates. For now, only 64 and 128 ticks are supported.*
+  - Different tickrates require their own recordings.
+
+2019-11-12
+- Minor fixes
+- New dust2 data
+
+2019-10-01
+- Changed alerts to hudhints
+
+2019-09-28
+- New commands to spawn greandes - an alternative to using the greandes in game.
+- Added experimental position only recording system. Commands: 'bm_rec_pos', 'bm_play_pos'
+
+2019-09-23
+- Minor fixes
+- Changed starting sound
+- Added every playermodel
+- New setup commands
+- Added dz_sirocco
+
+2019-09-17
+- Made recording togglable with 'bm_rec'
+- Bug fixes
+
+2019-09-16
+- Added more action sounds
+
+2019-09-13
+- Public release

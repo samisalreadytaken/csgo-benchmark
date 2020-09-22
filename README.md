@@ -8,7 +8,9 @@ By default, map data available for:
 \- `de_cache` <sup>(50 seconds)</sup>  
 \- `dz_sirocco` <sup>(81.25 seconds)</sup>  
 
-[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.2-informational
+[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.3-informational
+
+![](../pre-1.4.0/image.jpg)
 
 ## Installation
 Merge the `/csgo/` folder with your `/steamapps/common/Counter-Strike Global Offensive/csgo/` folder.
