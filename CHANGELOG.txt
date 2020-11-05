@@ -3,6 +3,12 @@
 
 --------------------------------
 
+2020-11-05 [v1.4.4]
+- Modified the dust2 data to be smoother
+- Added 4 new grenade spawns on the dust2 setup
+- Improved force stopping (bm_stop)
+- Backend improvements
+
 2020-09-18 [v1.4.3]
 - Removed the "Started..." message after countdown
 - Minor cleanup

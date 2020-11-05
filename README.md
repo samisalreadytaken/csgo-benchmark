@@ -8,18 +8,23 @@ By default, map data available for:
 \- `de_cache` <sup>(50 seconds)</sup>  
 \- `dz_sirocco` <sup>(81.25 seconds)</sup>  
 
-[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.3-informational
+[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.4-informational
 
 ![](../pre-1.4.0/image.jpg)
+
+## How it works
+This is a script for the game's scripting system to playback recorded paths and grenade setups consistently, and print out the average FPS on completion. This script cannot access to any (more) benchmark details due to the limitations of the system.
 
 ## Installation
 Merge the `/csgo/` folder with your `/steamapps/common/Counter-Strike Global Offensive/csgo/` folder.
 
-This only adds 4 files to your /csgo/ folder. It does not overwrite any game files, and it does not interfere with the game in any way. It is VAC safe, and you can only use this script on your own server.
+This only adds 4 files to your `/csgo/` folder. It does not overwrite any game files, and it does not interfere with the game in any way. You can only use this script on your own server.
 
 ### Downloading
-**Method 1.**
-Manually download the repo by clicking [**HERE**](https://github.com/samisalreadytaken/csgo-benchmark/archive/master.zip). Then extract the folder.
+Download the repo by clicking [**HERE**](https://github.com/samisalreadytaken/csgo-benchmark/archive/master.zip). Then extract the folder.
+
+<details><summary>Alternative methods</summary>
+
 
 **Method 2.**
 On Windows 10 17063 or later, run the [`install_csgo-benchmark.bat`](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat) file to automatically download the script into your game files. It can also be used to update the script.
@@ -30,6 +35,8 @@ In bash, after changing the directory below to your Steam game library directory
 cd "C:/Program Files/Steam/steamapps/common/Counter-Strike Global Offensive/" &&
 curl https://codeload.github.com/samisalreadytaken/csgo-benchmark/tar.gz/master | tar -xz --strip=1 csgo-benchmark-master/csgo
 ```
+
+</details>
 
 ## Usage
 Use the console commands to load and control the script. You need to load it each time you change the map.
