@@ -53,6 +53,7 @@ SND_BUTTON <- "UIPanorama.XP.Ticker";
 
 if ( !("m_bStarted" in this) )
 {
+	Fmt <- ::format;
 	Msg <- ::print;
 	m_bStartedPending <- false;
 	m_bStarted <- false;
@@ -170,7 +171,7 @@ function CheckData():(szMapName)
 	local c1 = "l_" + szMapName;
 
 	if ( !(c1 in this) )
-		return Msg("[!] Could not find map data for '" + szMapName + "'\n");
+		return Msg(Fmt( "[!] Could not find map data for '%s'\n", szMapName ));
 
 	local data = this[c1];
 
@@ -239,7 +240,7 @@ function Start( bPathOnly = 0 ):( szMapName )
 
 	::SendToConsole("r_cleardecals;clear;echo;echo;echo;echo\"   Starting in 3 seconds...\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo;echo;developer 0;toggleconsole;fadeout");
 
-	::VS.EventQueue.AddEvent( _Start, 3.5 );
+	::VS.EventQueue.AddEvent( _Start, 3.5, this );
 }
 
 function _Start()
@@ -252,8 +253,8 @@ function _Start()
 	::SendToConsole("fadein;fps_max 0;bench_start;bench_end;host_framerate 0;host_timescale 1;clear;echo;echo;echo;echo\"   Benchmark has started\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo");
 }
 
-// i == 0 : force stopped
-// i == 1 : path completed
+// 0 : force stopped
+// 1 : path completed
 function Stop( i = 0 ):( szMapName )
 {
 	if ( !m_bStarted )
@@ -264,7 +265,9 @@ function Stop( i = 0 ):( szMapName )
 
 	m_bStarted = false;
 
+	::VS.EventQueue.CancelEventsByInput( Dispatch );
 	::SendToConsole( "ent_cancelpendingentfires" );
+
 	::EntFireByHandle( m_hCam, "Disable", "", 0, ::HPlayer );
 	::EntFireByHandle( m_hThink, "Disable" );
 	ToggleCounter(0);
@@ -278,22 +281,22 @@ function Stop( i = 0 ):( szMapName )
 	}
 	else
 	{
-		szOutTime = flDiff + " seconds (expected: " + m_flTargetLength + ")";
+		szOutTime = Fmt( "%g seconds (expected: %g)", flDiff, m_flTargetLength );
 	};
 
 	::SendToConsole("host_framerate 0;host_timescale 1");
-	::SendToConsole("clear;echo;echo;echo;echo\"----------------------------\";echo;echo " +
-
+	::SendToConsole(Fmt( "clear;echo;echo;echo;echo\"----------------------------\";echo;echo %s;echo;echo\"Map: %s\";echo\"Tickrate: %g\";echo;toggleconsole;echo\"Time: %s\";echo;bench_end;echo;echo\"----------------------------\";echo;echo",
 		( i ? "Benchmark finished." :
-		"Stopped benchmark.;toggleconsole" )
-
-	+";echo;echo\"Map: " + szMapName + "\";echo\"Tickrate: "+ VS.GetTickrate() + "\";echo;toggleconsole" + ";echo\"Time: " + szOutTime + "\";echo;bench_end;echo;echo\"----------------------------\";echo;echo");
+		"Stopped benchmark.;toggleconsole" ),
+		szMapName,
+		VS.GetTickrate(),
+		szOutTime ));
 	::SendToConsole("developer " + m_iDev);
 
 	if (i) PlaySound("Buttons.snd9");
 	PlaySound("UIPanorama.gameover_show");
 
-	::Chat( txt.orange + "● " + txt.grey + "Benchmark results are printed in the console." );
+	::Chat(Fmt( "%s● %sBenchmark results are printed in the console.", txt.orange, txt.grey ));
 }
 
 function PostSpawn()
@@ -308,8 +311,8 @@ function PostSpawn()
 	for ( local i = 18; i--; ) ::Chat(" ");
 	::Chat(::txt.blue+" --------------------------------");
 	::Chat("");
-	::Chat(::txt.lightgreen + "[Benchmark Script v"+_VER_+"]");
-	::Chat(::txt.orange + "● " + ::txt.grey + "Server tickrate: " + ::txt.yellow + VS.GetTickrate());
+	::Chat(Fmt( "%s[Benchmark Script v%s]", txt.lightgreen, _VER_ ));
+	::Chat(Fmt( "%s● %sServer tickrate: %s%g", txt.orange, txt.grey, txt.yellow, VS.GetTickrate() ));
 	::Chat("");
 	::Chat(::txt.blue+" --------------------------------");
 
@@ -329,7 +332,7 @@ function PostSpawn()
 function WelcomeMsg():(szMapName)
 {
 	Msg("\n\n\n");
-	Msg("   [v"+_VER_+"]     github.com/samisalreadytaken/csgo-benchmark\n");
+	Msg(Fmt( "   [v%s]     github.com/samisalreadytaken/csgo-benchmark\n", _VER_ ));
 	Msg("\n");
 	Msg("Console commands:\n");
 	Msg("\n");
@@ -350,13 +353,14 @@ function WelcomeMsg():(szMapName)
 	Msg("\n");
 	Msg("[i] The benchmark sets your fps_max to 0\n");
 	Msg("\n");
-	Msg("[i] Map: " + szMapName + "\n");
-	Msg("[i] Server tickrate: " + VS.GetTickrate() + "\n\n\n");
+	Msg(Fmt( "[i] Map: %s\n", szMapName ));
+	Msg(Fmt( "[i] Server tickrate: %g\n\n\n", VS.GetTickrate() ));
 
 	if ( !VS.IsInteger( 128.0 / VS.GetTickrate() ) )
 	{
-		Msg(format( "[!] Invalid tickrate (%.1f)! Only 128 and 64 tickrates are supported.\n",VS.GetTickrate() ));
-		Chat(format( "%s[!] %sInvalid tickrate ( %s%.1f%s )! Only 128 and 64 tickrates are supported.", txt.red, txt.white, txt.yellow, VS.GetTickrate(), txt.white ));
+		Msg(Fmt( "[!] Invalid tickrate (%g)! Only 128 and 64 tickrates are supported.\n", VS.GetTickrate() ));
+		Chat(Fmt( "%s[!] %sInvalid tickrate ( %s%g%s )! Only 128 and 64 tickrates are supported.",
+			txt.red, txt.white, txt.yellow, VS.GetTickrate(), txt.white ));
 	};
 
 	if ( !CheckData() )
@@ -369,7 +373,7 @@ function WelcomeMsg():(szMapName)
 function PrintSetupCmd()
 {
 	Msg("\n");
-	Msg("   [v"+_VER_+"]     github.com/samisalreadytaken/csgo-benchmark\n");
+	Msg(Fmt( "   [v%s]     github.com/samisalreadytaken/csgo-benchmark\n", _VER_ ));
 	Msg("\n");
 	Msg("bm_timer   : Toggle counter\n");
 	Msg("           :\n");
@@ -433,10 +437,10 @@ function ListSetupData():(szMapName)
 		return Msg("No saved data found.\n");
 
 	Msg( "//------------------------\n// Copy the lines below:\n\n\n" );
-	Msg( "function Setup_" + szMapName + "()\n{\n" );
-	foreach( k in m_list_models ) Msg( "\t" + k + "\n" );
+	Msg(Fmt( "function Setup_%s()\n{\n", szMapName ));
+	foreach( k in m_list_models ) Msg(Fmt( "\t%s\n", k ));
 	Msg("");
-	foreach( k in m_list_nades ) Msg( "\t" + k + "\n" );
+	foreach( k in m_list_nades ) Msg(Fmt( "\t%s\n", k ));
 	Msg( "}\n\n" );
 	Msg( "\n//------------------------\n" );
 }
@@ -447,7 +451,7 @@ function PrintMDL( i = 0 )
 	local vecOrigin = HPlayer.GetOrigin();
 
 	PlaySound(SND_BUTTON);
-	local out = "SpawnMDL( " + VecToString( vecOrigin ) + "," + HPlayer.GetAngles().y + ", MDL.ST6k )";
+	local out = Fmt( "SpawnMDL( %s,%g, MDL.ST6k )", VecToString( vecOrigin ), HPlayer.GetAngles().y );
 
 	if (i)
 	{
@@ -457,19 +461,25 @@ function PrintMDL( i = 0 )
 	};
 
 	m_list_models.append(out);
-	Msg( "\n" + out + "\n" );
+	Msg(Fmt( "\n%s\n", out ));
 	m_iRecLast = 0;
 }
 
+
+local kSmoke     = 0;
+local kFlash     = 1;
+local kHE        = 2;
+local kMolotov   = 3;
+local kExplosion = 4;
+
+
 // bm_flash
-function PrintFlash( i = 0 )
+function PrintFlash( i = 0 ) : ( kFlash )
 {
 	PlaySound(SND_BUTTON);
 
 	local vecOrigin = HPlayer.GetOrigin();
 	vecOrigin.z += 4.0;
-
-	local out = "SpawnFlash( " + VecToString( vecOrigin ) + ", 0.0 )";
 
 	if (i)
 	{
@@ -480,23 +490,23 @@ function PrintFlash( i = 0 )
 			t.z += 32;
 			HPlayer.SetOrigin(t);
 		};
-		return Dispatch( vecOrigin, 1 );
+		return Dispatch( vecOrigin, kFlash );
 	};
 
+	local out = Fmt( "SpawnFlash( %s, 0.0 )", VecToString( vecOrigin ) );
+
 	m_list_nades.append(out);
-	Msg( "\n" + out + "\n" );
+	Msg(Fmt( "\n%s\n", out ));
 	m_iRecLast = 1;
 }
 
 // bm_he
-function PrintHE( i = 0 )
+function PrintHE( i = 0 ) : ( kHE )
 {
 	PlaySound(SND_BUTTON);
 
 	local vecOrigin = HPlayer.GetOrigin();
 	vecOrigin.z += 4.0;
-
-	local out = "SpawnHE( " + VecToString( vecOrigin ) + ", 0.0 )";
 
 	if (i)
 	{
@@ -507,23 +517,23 @@ function PrintHE( i = 0 )
 			t.z += 32;
 			HPlayer.SetOrigin(t);
 		};
-		return Dispatch( vecOrigin, 2 );
+		return Dispatch( vecOrigin, kHE );
 	};
 
+	local out = Fmt( "SpawnHE( %s, 0.0 )", VecToString( vecOrigin ) );
+
 	m_list_nades.append(out);
-	Msg( "\n" + out + "\n" );
+	Msg(Fmt( "\n%s\n", out ));
 	m_iRecLast = 1;
 }
 
 // bm_molo
-function PrintMolo( i = 0 )
+function PrintMolo( i = 0 ) : ( kMolotov )
 {
 	PlaySound(SND_BUTTON);
 
 	local vecOrigin = HPlayer.GetOrigin();
 	vecOrigin.z += 4.0;
-
-	local out = "SpawnMolotov( " + VecToString( vecOrigin ) + ", 0.0 )";
 
 	if (i)
 	{
@@ -534,108 +544,119 @@ function PrintMolo( i = 0 )
 			t.z += 32;
 			HPlayer.SetOrigin(t);
 		};
-		return Dispatch( vecOrigin, 3 );
+		return Dispatch( vecOrigin, kMolotov );
 	};
 
+	local out = Fmt( "SpawnMolotov( %s, 0.0 )", VecToString( vecOrigin ) );
+
 	m_list_nades.append(out);
-	Msg( "\n" + out + "\n" );
+	Msg(Fmt( "\n%s\n", out ));
 	m_iRecLast = 1;
 }
 
 // bm_smoke
-function PrintSmoke( i = 0 )
+function PrintSmoke( i = 0 ) : ( kSmoke )
 {
 	local vecOrigin = HPlayer.GetOrigin();
 
 	PlaySound(SND_BUTTON);
-	local out = "SpawnSmoke( " + VecToString( vecOrigin ) + ", 0.0 )";
 
 	if (i)
-		return Dispatch( vecOrigin, 0 );
+		return Dispatch( vecOrigin, kSmoke );
+
+	local out = Fmt( "SpawnSmoke( %s, 0.0 )", VecToString( vecOrigin ) );
 
 	m_list_nades.append(out);
-	Msg( "\n" + out + "\n" );
+	Msg(Fmt( "\n%s\n", out ));
 	m_iRecLast = 1;
 }
 
 // bm_expl
-function PrintExpl( i = 0 )
+function PrintExpl( i = 0 ) : ( kExplosion )
 {
 	local vecOrigin = HPlayer.GetOrigin();
 
 	PlaySound(SND_BUTTON);
-	local out = "SpawnExplosion( " + VecToString( vecOrigin ) + ", 0.0 )";
 
 	if (i)
-		return Dispatch( vecOrigin, 4 );
+		return Dispatch( vecOrigin, kExplosion );
+
+	local out = Fmt( "SpawnExplosion( %s, 0.0 )", VecToString( vecOrigin ) );
 
 	m_list_nades.append(out);
-	Msg( "\n" + out + "\n" );
+	Msg(Fmt( "\n%s\n", out ));
 	m_iRecLast = 1;
 }
 
-function __Spawn( v, t )
+local Entities = ::Entities;
+local EntFireByHandle = ::EntFireByHandle;
+local DispatchParticleEffect = ::DispatchParticleEffect;
+local SendToConsole = ::SendToConsole;
+local VecToString = ::VecToString;
+
+function __Spawn( v, t ) : (Entities, EntFireByHandle)
 {
-	for ( local e; e = ::Entities.FindByClassname( e, t + "_projectile" ); )
+	for ( local e; e = Entities.FindByClassname( e, t + "_projectile" ); )
 	{
 		e.SetOrigin( v );
-		::EntFireByHandle( e, "InitializeSpawnFromWorld" );
+		EntFireByHandle( e, "InitializeSpawnFromWorld" );
 	}
 }
 
-function Dispatch( v, i )
+function Dispatch( v, i ) :
+( kSmoke, kFlash, kHE, kMolotov, kExplosion, SendToConsole, DispatchParticleEffect, VecToString )
 {
 	switch ( i )
 	{
-	case 0:
-		::DispatchParticleEffect( "explosion_smokegrenade", v, ::Vector(1,0,0) );
+	case kSmoke:
+		DispatchParticleEffect( "explosion_smokegrenade", v, V(1,0,0) );
 		m_hHudHint.SetOrigin( v );
 		m_hHudHint.EmitSound( "BaseSmokeEffect.Sound" );
 		return;
 
-	case 1:
-		::SendToConsole( "ent_create flashbang_projectile\nscript _BM_.__Spawn(" + ::VecToString(v) + ",\"flashbang\")" );
+	case kFlash:
+		SendToConsole(Fmt( "ent_create flashbang_projectile\nscript _BM_.__Spawn(%s,\"flashbang\")", VecToString(v) ));
 		return;
 
-	case 2:
-		::SendToConsole( "ent_create hegrenade_projectile\nscript _BM_.__Spawn(" + ::VecToString(v) + ",\"hegrenade\")" );
+	case kHE:
+		SendToConsole(Fmt( "ent_create hegrenade_projectile\nscript _BM_.__Spawn(%s,\"hegrenade\")", VecToString(v) ));
 		return;
 
-	case 3:
-		::SendToConsole( "ent_create molotov_projectile\nscript _BM_.__Spawn(" + ::VecToString(v) + ",\"molotov\")" );
+	case kMolotov:
+		SendToConsole(Fmt( "ent_create molotov_projectile\nscript _BM_.__Spawn(%s,\"molotov\")", VecToString(v) ));
 		return;
 
-	case 4:
-		::DispatchParticleEffect( "explosion_c4_500", v, ::Vector() );
+	case kExplosion:
+		DispatchParticleEffect( "explosion_c4_500", v, V() );
 		m_hHudHint.SetOrigin( v );
 		m_hHudHint.EmitSound( "c4.explode" );
 		return;
 	}
 }
 
-function SpawnFlash( v, d )
+function SpawnFlash( v, d ) : ( kFlash )
 {
-	VS.EventQueue.AddEvent( Dispatch, d, [this,v,1], null, HPlayer );
+	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kFlash], null, HPlayer );
 }
 
-function SpawnHE( v, d )
+function SpawnHE( v, d ) : ( kHE )
 {
-	VS.EventQueue.AddEvent( Dispatch, d, [this,v,2], null, HPlayer );
+	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kHE], null, HPlayer );
 }
 
-function SpawnMolotov( v, d )
+function SpawnMolotov( v, d ) : ( kMolotov )
 {
-	VS.EventQueue.AddEvent( Dispatch, d, [this,v,3], null, HPlayer );
+	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kMolotov], null, HPlayer );
 }
 
-function SpawnSmoke( v, d )
+function SpawnSmoke( v, d ) : ( kSmoke )
 {
-	VS.EventQueue.AddEvent( Dispatch, d, [this,v,0], null, HPlayer );
+	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kSmoke], null, HPlayer );
 }
 
-function SpawnExplosion( v, d )
+function SpawnExplosion( v, d ) : ( kExplosion )
 {
-	VS.EventQueue.AddEvent( Dispatch, d, [this,v,4], null, HPlayer );
+	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kExplosion], null, HPlayer );
 }
 
 function SpawnMDL( v, a, m, p = 0 )
