@@ -13,7 +13,9 @@ By default, map data available for:
 ![](../pre-1.4.0/image.jpg)
 
 ## How it works
-This is a script for the game's scripting system to playback recorded paths and grenade setups consistently, and print out the average FPS on completion. This script cannot access to any (more) benchmark details due to the limitations of the system.
+This is a script for Source Engine's scripting system to playback recorded paths and grenade setups consistently in listen servers. This can be used to test or compare the general performance of the game in the tested maps.
+
+This script cannot access any benchmark details due to the limitations of the system.
 
 ## Installation
 Merge the `/csgo/` folder with your `/steamapps/common/Counter-Strike Global Offensive/csgo/` folder.
@@ -24,7 +26,6 @@ This only adds 4 files to your `/csgo/` folder. It does not overwrite any game f
 Download the repo by clicking [**HERE**](https://github.com/samisalreadytaken/csgo-benchmark/archive/master.zip). Then extract the folder.
 
 <details><summary>Alternative methods</summary>
-
 
 **Method 2.**
 On Windows 10 17063 or later, run the [`install_csgo-benchmark.bat`](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat) file to automatically download the script into your game files. It can also be used to update the script.
