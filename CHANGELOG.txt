@@ -3,6 +3,19 @@
 
 --------------------------------
 
+2021-07-08 [v1.4.5]
+- Fixed a bug that could cause inconsistencies in flashbang blindings depending on player's world angles
+- Changed flashbang explosion time to 0 to instantly explode on spawn (1.5 sec earlier than previous)
+	Effects of this change is rectified in existing setups (with 6 frame margin of error).
+- Remade the de_dust2 path with b-splines and D3DX angle interpolator to make it more fluid
+	Comparison video: https://youtu.be/M85XSs_hFRM
+- Slightly adjusted and recompiled de_cache path (bspline, d3dx)
+	Comparison video: https://youtu.be/XIucyLXy-no
+- Updated motion data parser to new version
+- Fixed stopping playback before it starts
+- Removed chat output on benchmark end
+- Temporarily removed dz_sirocco data
+
 2020-11-05 [v1.4.4]
 - Modified the dust2 data to be smoother
 - Added 4 new grenade spawns on the dust2 setup

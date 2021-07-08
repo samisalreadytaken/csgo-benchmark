@@ -6,14 +6,14 @@ Run benchmark on any map.
 By default, map data available for:  
 \- `de_dust2` <sup>(44 seconds)</sup>  
 \- `de_cache` <sup>(50 seconds)</sup>  
-\- `dz_sirocco` <sup>(81.25 seconds)</sup>  
 
-[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.4-informational
 
-![](../pre-1.4.0/image.jpg)
+[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.5-informational
+
+![](../assets/image.jpg)
 
 ## How it works
-This is a script for Source Engine's scripting system to playback recorded paths and grenade setups consistently in listen servers. This can be used to test or compare the general performance of the game in the tested maps.
+This is a script for Source Engine's scripting system to playback saved paths and grenade setups consistently in listen servers. This can be used to test or compare the general performance of the game in the tested maps.
 
 This script cannot access any benchmark details due to the limitations of the system.
 
@@ -23,7 +23,7 @@ Merge the `/csgo/` folder with your `/steamapps/common/Counter-Strike Global Off
 This only adds 4 files to your `/csgo/` folder. It does not overwrite any game files, and it does not interfere with the game in any way. You can only use this script on your own server.
 
 ### Downloading
-Download the repo by clicking [**HERE**](https://github.com/samisalreadytaken/csgo-benchmark/archive/master.zip). Then extract the folder.
+Manually download the repository ([`Code > Download ZIP`](https://github.com/samisalreadytaken/csgo-benchmark/archive/master.zip)), then extract the folder.
 
 <details><summary>Alternative methods</summary>
 
@@ -78,14 +78,14 @@ Command             | Description
 [![viddemo][]](https://www.youtube.com/watch?v=i_WziPbjNjY&t=1m7s)
 
 1. Record and export your path using the [keyframes](https://github.com/samisalreadytaken/keyframes) script.
-2. Copy and paste the data in `/csgo/scripts/vscripts/benchmark_res.nut`.
-3. If there is existing data for the map you've recorded for, delete the old line.
-4. Spawn playermodels and grenades for your liking:
-   1. You can get the data by using commands to print the Spawn functions; then use `bm_list` to print all the data you've saved to copy easily.
-   2. Paste the Setup function in `benchmark_res.nut`.
-   3. To find out when to spawn the grenades, use `benchmark;bm_timer` to start the timer along with the benchmark.
-   4. See `benchmark_res.nut` for examples and further details.
-5. Reload the script to load your changes. (`exec benchmark`)
+2. Rename the exported file extension to `nut`, and add it in `benchmark_res.nut` file with `IncludeScript("my_data.nut")`. If there is existing data for the map you've recorded for, delete or comment out the old line.
+3. Spawn playermodels and grenades for your liking:
+   1. Use the `bm_` commands to print and save grenade spawn functions.
+   2. Use `bm_list` to print all the data you've saved to copy easily.
+   3. Paste or create the Setup function in `benchmark_res.nut`.
+   4. To find out when to spawn the grenades, use `benchmark;bm_timer` to start the timer along with the benchmark.
+   5. See `benchmark_res.nut` for examples.
+4. Reload the script to load your changes. (`exec benchmark`)
 
 Done! You can run your new path by running the benchmark.
 
