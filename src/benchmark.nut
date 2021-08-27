@@ -41,8 +41,6 @@ SendToConsole("clear;script _BM_.PostSpawn()");
 
 m_szLastError <- null;
 
-VS.GetLocalPlayer();
-
 local g_FrameTime = 0.015625;
 
 if ( !("m_bPlayback" in this) )
@@ -68,12 +66,12 @@ if ( !("m_bPlayback" in this) )
 	m_list_nades <- [];
 };
 
+player <- VS.GetPlayerByIndex(1);
+
 if ( !("m_hThink" in this) )
 {
 	g_szMapName <- split( GetMapName(), "/" ).top();
 	g_flTickrate <- 1.0 / FrameTime();
-
-	player <- HPlayer;
 
 	m_hStrip <- VS.CreateEntity( "game_player_equip",{ spawnflags = 1<<1 }, 1 ).weakref();
 	m_hHudHint <- VS.CreateEntity( "env_hudhint", null, 1 ).weakref();
@@ -475,12 +473,12 @@ function PostSpawn()
 	PlaySound("Player.DrownStart");
 
 	for ( local i = 18; i--; ) Chat("");
-	Chat( txt.blue + " --------------------------------" );
+	Chat( TextColor.Uncommon + " --------------------------------" );
 	Chat("");
-	Chat(Fmt( "%s[Benchmark Script v%s]", txt.lightgreen, _VER_ ));
-	Chat(Fmt( "%s● %sServer tickrate: %s%g", txt.orange, txt.grey, txt.yellow, g_flTickrate ));
+	Chat(Fmt( "%s[Benchmark Script v%s]", TextColor.Achievement, _VER_ ));
+	Chat(Fmt( "%s● %sServer tickrate: %s%g", TextColor.Immortal, TextColor.Silver, TextColor.Gold, g_flTickrate ));
 	Chat("");
-	Chat( txt.blue + " --------------------------------" );
+	Chat( TextColor.Uncommon + " --------------------------------" );
 
 	// print after Steamworks Msg
 	if ( GetDeveloperLevel() > 0 )
@@ -526,7 +524,7 @@ function WelcomeMsg()
 	{
 		Msg(Fmt( "[!] Invalid tickrate (%g)! Only 128 and 64 tickrates are supported.\n", g_flTickrate ));
 		Chat(Fmt( "%s[!] %sInvalid tickrate ( %s%g%s )! Only 128 and 64 tickrates are supported.",
-			txt.red, txt.white, txt.yellow, g_flTickrate, txt.white ));
+			TextColor.Red, TextColor.Normal, TextColor.Gold, g_flTickrate, TextColor.Normal ));
 	};
 
 	LoadFile();
