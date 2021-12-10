@@ -8,7 +8,7 @@ By default, map data available for:
 \- `de_cache` <sup>(50 seconds)</sup>  
 
 
-[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.5-informational
+[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.6-informational
 
 ![](../assets/image.jpg)
 
@@ -20,7 +20,7 @@ This script cannot access any benchmark details due to the limitations of the sy
 ## Installation
 Merge the `/csgo/` folder with your `/steamapps/common/Counter-Strike Global Offensive/csgo/` folder.
 
-This only adds 4 files to your `/csgo/` folder. It does not overwrite any game files, and it does not interfere with the game in any way. You can only use this script on your own server.
+This only adds 6 files to your `/csgo/` folder. It does not overwrite any game files, and it does not interfere with the game in any way. It can only be used on your own local server.
 
 ### Downloading
 Manually download the repository ([`Code > Download ZIP`](https://github.com/samisalreadytaken/csgo-benchmark/archive/master.zip)), then extract the folder.
@@ -28,7 +28,7 @@ Manually download the repository ([`Code > Download ZIP`](https://github.com/sam
 <details><summary>Alternative methods</summary>
 
 **Method 2.**
-On Windows 10 17063 or later, run the [`install_csgo-benchmark.bat`](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat) file to automatically download the script into your game files. It can also be used to update the script.
+On Windows 10 17063 or later, run the [`install_csgo-benchmark.bat`](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat) file to automatically download the script into your game files.
 
 **Method 3.**
 In bash, after changing the directory below to your Steam game library directory, use the following commands to install the script into your game files.
@@ -40,7 +40,7 @@ curl https://codeload.github.com/samisalreadytaken/csgo-benchmark/tar.gz/master 
 </details>
 
 ## Usage
-Use the console commands to load and control the script. You need to load it each time you change the map.
+Use the console commands to load and control the script. It needs to be loaded it each time the map is changed.
 
 Command             | Description
 ------------------- | -------------------
@@ -89,8 +89,8 @@ Command             | Description
 
 Done! You can run your new path by running the benchmark.
 
-## License
-You are free to use, modify and share this script under the terms of the GNU GPLv2.0 license. In short, you must keep the copyright notice, and make your modifications public under the same license if you distribute it.
+## Licence
+You are free to use, modify and share this script under the terms of the GNU GPLv2.0 licence. In short, you must keep the copyright notice, and make your modifications public under the same licence if you distribute it.
 
 This script uses [vs_library](https://github.com/samisalreadytaken/vs_library).
 
