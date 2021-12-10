@@ -1,11 +1,11 @@
 //-----------------------------------------------------------------------
 //------------------- Copyright (c) samisalreadytaken -------------------
 //                       github.com/samisalreadytaken
-//- v1.4.5 --------------------------------------------------------------
+//- v1.4.6 --------------------------------------------------------------
 IncludeScript("vs_library");
 
 if ( !("_BM_"in getroottable()) )
-	::_BM_ <- { version = "1.4.5" };;
+	::_BM_ <- { version = "1.4.6" };;
 
 local _ = function(){
 
@@ -41,10 +41,9 @@ SendToConsole("clear;script _BM_.PostSpawn()");
 
 m_szLastError <- null;
 
-local g_FrameTime = 0.015625;
-
 if ( !("m_bPlayback" in this) )
 {
+	g_FrameTime <- 0.015625;
 	SND_BUTTON <- "UIPanorama.XP.Ticker";
 	Fmt <- format;
 	Msg <- print;
@@ -52,6 +51,8 @@ if ( !("m_bPlayback" in this) )
 	ClientCommand <- SendToConsole;
 
 	m_FileBuffer <- { V = Vector, Q = dummy }
+	m_fnSetup <- null;
+	m_DataBuffer <- {};
 	m_PathData <- [];
 	m_nPlaybackIdx <- 0;
 	m_nPlaybackTarget <- 0;
@@ -201,38 +202,62 @@ class point_t
 	angles = null;
 }
 
-function LoadFile()
+function LoadData()
 {
+	m_DataBuffer.clear();
+	m_fnSetup = null;
+
 	try( DoIncludeScript( "benchmark_res", m_FileBuffer ) )
 	catch(e)
 	{
-		m_szLastError = "ERROR: Could not find the benchmark resource file.\n";
-		return;
+		// not mandatory
 	}
-}
 
-function LoadData() : ( g_FrameTime )
-{
-	local dataName = "bm_" + g_szMapName;
-
-	if ( !(dataName in m_FileBuffer) )
+	// Load bm_mapname.nut by default
+	try( DoIncludeScript( "bm_"+g_szMapName+".nut", m_DataBuffer ) )
+	catch(x)
 	{
-		// alternative prefix
-		dataName = "l_" + g_szMapName;
+		// Check if data named bm_mapname is manually loaded in the resource file
 
+		local dataName = "bm_"+g_szMapName;
 		if ( !(dataName in m_FileBuffer) )
 		{
-			m_szLastError = Fmt( "[!] Map data not found for '%s'\n", g_szMapName );
-			return;
+			// alternative prefix
+			dataName = "l_" + g_szMapName;
+
+			if ( !(dataName in m_FileBuffer) )
+			{
+				m_szLastError = Fmt( "[!] Map data not found for '%s'\n", g_szMapName );
+				return;
+			};
 		};
+
+		m_DataBuffer[0] <- delete m_FileBuffer[dataName];
+	}
+
+	if ( !m_DataBuffer.len() )
+	{
+		m_szLastError = "[!] Empty data file\n";
+		return;
 	};
 
-	local pInput = delete m_FileBuffer[dataName];
+	local pInput;
 	local nVersion = -1;
 
-	if ( "version" in pInput )
+	foreach( v in m_DataBuffer )
 	{
-		nVersion = pInput.version;
+		if ( "version" in v )
+		{
+			pInput = v;
+			nVersion = v.version;
+			break;
+		};
+	}
+
+	if ( !pInput )
+	{
+		m_szLastError = "[!] Empty data file\n";
+		return;
 	};
 
 	// KF_SAVE_V2
@@ -282,6 +307,20 @@ function LoadData() : ( g_FrameTime )
 	{
 		m_szLastError = "[!] Empty path data.\n";
 	};
+
+	local fn = "Setup_" + g_szMapName;
+	if ( "Setup" in m_DataBuffer )
+	{
+		m_fnSetup = m_DataBuffer.Setup;
+	}
+	else if ( fn in m_DataBuffer )
+	{
+		m_fnSetup = m_DataBuffer[fn];
+	}
+	else if ( fn in m_FileBuffer )
+	{
+		m_fnSetup = m_FileBuffer[fn];
+	};;;
 }
 
 //--------------------------------------------------------------
@@ -369,11 +408,9 @@ function Start( bPathOnly = 0 )
 	EntFireByHandle( m_hStrip, "Use", "", 0, player );
 	player.SetHealth(1337);
 
-	if ( !bPathOnly )
+	if ( !bPathOnly && m_fnSetup )
 	{
-		local fn = "Setup_" + g_szMapName;
-		if ( fn in m_FileBuffer )
-			m_FileBuffer[fn].call(this);
+		m_fnSetup.call(this);
 	};
 
 	m_bPlaybackPending = true;
@@ -400,7 +437,7 @@ function Start( bPathOnly = 0 )
 	VS.EventQueue.AddEvent( PlaySound, 0.5, [this, "Weapon_AWP.BoltForward"] );
 	PlaySound("Weapon_AWP.BoltBack");
 
-	ClientCommand("r_cleardecals;clear;echo;echo;echo;echo\"   Starting in 3 seconds...\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo;echo;developer 0;toggleconsole;fadeout");
+	ClientCommand("r_cleardecals;fps_max 0;clear;echo;echo;echo;echo\"   Starting in 3 seconds...\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo;echo;developer 0;hideconsole;fadeout");
 
 	VS.EventQueue.AddEvent( _Start, 3.5, this );
 }
@@ -412,7 +449,7 @@ function _Start()
 	m_flTimeStart = Time();
 	EntFireByHandle( m_hCam, "Enable", "", 0, player );
 	EntFireByHandle( m_hThink, "Enable" );
-	ClientCommand("fadein;fps_max 0;bench_start;bench_end;host_framerate 0;host_timescale 1;clear;echo;echo;echo;echo\"   Benchmark has started\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo");
+	ClientCommand("fadein;bench_start;bench_end;host_framerate 0;host_timescale 1;clear;echo;echo;echo;echo\"   Benchmark has started\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo");
 }
 
 // 0 : force stopped
@@ -453,9 +490,9 @@ function Stop( i = 0 )
 	};
 
 	ClientCommand("host_framerate 0;host_timescale 1");
-	ClientCommand(Fmt( "clear;echo;echo;echo;echo\"----------------------------\";echo;echo %s;echo;echo\"Map: %s\";echo\"Tickrate: %g\";echo;toggleconsole;echo\"Time: %s\";echo;bench_end;echo;echo\"----------------------------\";echo;echo",
+	ClientCommand(Fmt( "clear;echo;echo;echo;echo\"----------------------------\";echo;echo %s;echo;echo\"Map: %s\";echo\"Tickrate: %g\";echo;showconsole;echo\"Time: %s\";echo;bench_end;echo;echo\"----------------------------\";echo;echo",
 		( i ? "Benchmark finished." :
-		"Stopped benchmark.;toggleconsole" ),
+		"Stopped benchmark." ),
 		g_szMapName,
 		g_flTickrate,
 		szOutTime ));
@@ -525,7 +562,6 @@ function WelcomeMsg()
 			TextColor.Red, TextColor.Normal, TextColor.Gold, g_flTickrate, TextColor.Normal ));
 	};
 
-	LoadFile();
 	LoadData();
 
 	if ( !ErrorCheck() )

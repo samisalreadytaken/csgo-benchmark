@@ -33,9 +33,9 @@ enum POSE
 
 //---------------
 //
-// While testing the timings, type `benchmark;bm_timer` in the console to start the timer.
+// While testing the timings, execute `benchmark;bm_timer` in the console to start the timer.
 //
-// Use the commands to get the setup lines
+// Use the commands to get setup lines
 //    bm_mdl
 //    bm_flash
 //    bm_he
@@ -45,7 +45,7 @@ enum POSE
 //
 // Use bm_list to print every saved line
 //
-// Restarting the round (mp_restartgame 1) will remove the spawned models
+// Restarting the round (mp_restartgame 1) will remove spawned models
 //
 //---------------
 function Setup_de_dust2()
@@ -165,12 +165,3 @@ function Setup_de_cache()
 	SpawnMolotov( Vector(893.321,262.666,1613.03), 47.0 ) // garage
 	SpawnFlash( Vector(-180.797,471.651,1877.37), 49.6 ) // highway
 }
-
-
-//---------------
-// Motion data
-//---------------
-
-IncludeScript("bm_de_dust2.nut")
-IncludeScript("bm_de_cache.nut")
-

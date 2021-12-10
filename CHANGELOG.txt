@@ -3,6 +3,11 @@
 
 --------------------------------
 
+2021-12-10 [v1.4.6]
+- Map data loading now looks for a file named 'bm_mapname.nut' first, then 'bm_mapname <- {}' inside the resource file.
+- Setup functions can now be loaded from the data file 'bm_mapname.nut'.
+- fps_max is now set to 0 when 'benchmark' command is executed instead of after the countdown.
+
 2021-07-08 [v1.4.5]
 - Fixed a bug that could cause inconsistencies in flashbang blindings depending on player's world angles
 - Changed flashbang explosion time to 0 to instantly explode on spawn (1.5 sec earlier than previous)
