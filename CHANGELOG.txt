@@ -3,6 +3,12 @@
 
 --------------------------------
 
+2022-01-25 [v1.4.7]
+- Added SetLooping() - suggested by DubMFG
+- Added SetMaxFPS()
+- Removed all chat message prints
+- Removed inventory wheel display on bench start
+
 2021-12-10 [v1.4.6]
 - Map data loading now looks for a file named 'bm_mapname.nut' first, then 'bm_mapname <- {}' inside the resource file.
 - Setup functions can now be loaded from the data file 'bm_mapname.nut'.

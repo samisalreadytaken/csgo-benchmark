@@ -1,11 +1,13 @@
 //-----------------------------------------------------------------------
 //------------------- Copyright (c) samisalreadytaken -------------------
 //                       github.com/samisalreadytaken
-//- v1.4.6 --------------------------------------------------------------
+//-----------------------------------------------------------------------
+local VERSION = "1.4.7";
+
 IncludeScript("vs_library");
 
 if ( !("_BM_"in getroottable()) )
-	::_BM_ <- { version = "1.4.6" };;
+	::_BM_ <- { version = VERSION };;
 
 local _ = function(){
 
@@ -39,8 +41,6 @@ SendToConsole("alias bm_rec\"script _BM_.Record()\"");
 
 SendToConsole("clear;script _BM_.PostSpawn()");
 
-m_szLastError <- null;
-
 if ( !("m_bPlayback" in this) )
 {
 	g_FrameTime <- 0.015625;
@@ -58,6 +58,9 @@ if ( !("m_bPlayback" in this) )
 	m_nPlaybackTarget <- 0;
 	m_bPlaybackPending <- false;
 	m_bPlayback <- false;
+	m_nPlaybackType <- 0;
+	m_bLooping <- false;
+	m_nMaxFPS <- 0;
 	m_flTimeStart <- 0.0;
 	m_iDev <- 0;
 	m_iRecLast <- 0;
@@ -66,8 +69,6 @@ if ( !("m_bPlayback" in this) )
 	m_list_models <- null;
 	m_list_nades <- null;
 };
-
-player <- VS.GetPlayerByIndex(1);
 
 if ( !("m_hThink" in this) )
 {
@@ -80,6 +81,9 @@ if ( !("m_hThink" in this) )
 	m_hThink <- VS.Timer( 1, g_FrameTime, null, null, 1, 1 ).weakref();
 	m_hCounter <- null;
 };
+
+m_szLastError <- null;
+player <- VS.GetPlayerByIndex(1);
 
 //--------------------------------------------------------------
 
@@ -316,11 +320,18 @@ function LoadData()
 	else if ( fn in m_DataBuffer )
 	{
 		m_fnSetup = m_DataBuffer[fn];
-	}
-	else if ( fn in m_FileBuffer )
+	};;
+
+	// Let the _res file overwrite setup functions
+	if ( fn in m_FileBuffer )
 	{
 		m_fnSetup = m_FileBuffer[fn];
-	};;;
+	};
+
+	m_DataBuffer.clear();
+	m_FileBuffer.clear();
+	m_FileBuffer.V <- Vector;
+	m_FileBuffer.Q <- dummy;
 }
 
 //--------------------------------------------------------------
@@ -334,6 +345,19 @@ function Hint(s)
 {
 	m_hHudHint.__KeyValueFromString( "message", s );
 	return EntFireByHandle( m_hHudHint, "ShowHudHint", "", 0.0, player );
+}
+
+function SetLooping(i)
+{
+	m_bLooping = !!i;
+}
+
+function SetMaxFPS(i)
+{
+	if ( i < 0 && i != -1 )
+		i = 0;
+
+	m_nMaxFPS = i;
 }
 
 function ToggleCounter( i = null )
@@ -370,7 +394,15 @@ VS.OnTimer( m_hThink, function()
 	player.SetAngles( a.x, a.y, 0.0 );
 
 	if ( m_nPlaybackTarget <= ++m_nPlaybackIdx )
-		return Stop(1);
+	{
+		if ( !m_bLooping )
+			return Stop(1);
+
+		if ( !m_nPlaybackType && m_fnSetup )
+			m_fnSetup.call(this);
+
+		m_nPlaybackIdx = 0;
+	};
 
 }, this );
 
@@ -402,6 +434,10 @@ function Start( bPathOnly = 0 )
 	if ( !ErrorCheck() )
 		return;
 
+	m_nMaxFPS = 0;
+	m_bLooping = false;
+	m_nPlaybackType = bPathOnly;
+
 	EntFireByHandle( m_hThink, "Disable" );
 	m_nPlaybackIdx = 0;
 
@@ -416,51 +452,45 @@ function Start( bPathOnly = 0 )
 	m_bPlaybackPending = true;
 	m_iDev = GetDeveloperLevel();
 
-	local _1 = [null,"+quickinv"],_0 = [null,"-quickinv"];
-	VS.EventQueue.AddEvent( ClientCommand, 0.0, _1 ); VS.EventQueue.AddEvent( ClientCommand, 0.1, _0 );
-	VS.EventQueue.AddEvent( ClientCommand, 0.2, _1 ); VS.EventQueue.AddEvent( ClientCommand, 0.3, _0 );
-	VS.EventQueue.AddEvent( ClientCommand, 0.4, _1 ); VS.EventQueue.AddEvent( ClientCommand, 0.5, _0 );
-
-	local param_snd = [this, "Alert.WarmupTimeoutBeep"];
+	local snd = [this, "Alert.WarmupTimeoutBeep"];
 
 	VS.EventQueue.AddEvent( Hint, 0.5, [this, "Starting in 3..."] );
-	VS.EventQueue.AddEvent( PlaySound, 0.5, param_snd );
+	VS.EventQueue.AddEvent( PlaySound, 0.5, snd );
 
 	VS.EventQueue.AddEvent( Hint, 1.5, [this, "Starting in 2..."] );
-	VS.EventQueue.AddEvent( PlaySound, 1.5, param_snd );
+	VS.EventQueue.AddEvent( PlaySound, 1.5, snd );
 
 	VS.EventQueue.AddEvent( Hint, 2.5, [this, "Starting in 1..."] );
-	VS.EventQueue.AddEvent( PlaySound, 2.5, param_snd );
+	VS.EventQueue.AddEvent( PlaySound, 2.5, snd );
 
-	EntFireByHandle( m_hHudHint, "HideHudHint", "", 3.5, player, player );
+	EntFireByHandle( m_hHudHint, "HideHudHint", "", 3.5, player );
 
 	VS.EventQueue.AddEvent( PlaySound, 0.5, [this, "Weapon_AWP.BoltForward"] );
 	PlaySound("Weapon_AWP.BoltBack");
 
-	ClientCommand("r_cleardecals;fps_max 0;clear;echo;echo;echo;echo\"   Starting in 3 seconds...\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo;echo;developer 0;hideconsole;fadeout");
+	ClientCommand(Fmt( "r_cleardecals%s;clear;echo;echo;echo;echo\"   Starting in 3 seconds...\";echo;developer 0;hideconsole;fadeout",
+		(m_nMaxFPS != -1 ? ";fps_max "+m_nMaxFPS : "") ));
 
-	VS.EventQueue.AddEvent( _Start, 3.5, this );
+	VS.EventQueue.AddEvent( StartInternal, 3.5, this );
 }
 
-function _Start()
+function StartInternal()
 {
 	m_bPlaybackPending = false;
 	m_bPlayback = true;
 	m_flTimeStart = Time();
 	EntFireByHandle( m_hCam, "Enable", "", 0, player );
 	EntFireByHandle( m_hThink, "Enable" );
-	ClientCommand("fadein;bench_start;bench_end;host_framerate 0;host_timescale 1;clear;echo;echo;echo;echo\"   Benchmark has started\";echo;echo\"   Keep the console closed for higher FPS\";echo;echo");
+	ClientCommand("fadein;bench_start;bench_end;host_framerate 0;host_timescale 1;clear;echo;echo;echo;echo\"   Benchmark has started\";echo;echo");
 }
 
-// 0 : force stopped
-// 1 : path completed
-function Stop( i = 0 )
+function Stop( bAuto = 0 )
 {
 	if ( m_bPlaybackPending )
 	{
 		m_bPlaybackPending = false;
 		ClientCommand("fadein");
-		VS.EventQueue.CancelEventsByInput( _Start );
+		VS.EventQueue.CancelEventsByInput( StartInternal );
 		VS.EventQueue.CancelEventsByInput( Hint );
 		VS.EventQueue.CancelEventsByInput( PlaySound );
 		EntFireByHandle( m_hHudHint, "HideHudHint", "", 0.0, player );
@@ -480,7 +510,7 @@ function Stop( i = 0 )
 	local szOutTime;
 	local flDiff = Time() - m_flTimeStart;
 
-	if ( flDiff == m_flTargetLength )
+	if ( flDiff == m_flTargetLength || m_bLooping )
 	{
 		szOutTime = flDiff + " seconds";
 	}
@@ -491,14 +521,14 @@ function Stop( i = 0 )
 
 	ClientCommand("host_framerate 0;host_timescale 1");
 	ClientCommand(Fmt( "clear;echo;echo;echo;echo\"----------------------------\";echo;echo %s;echo;echo\"Map: %s\";echo\"Tickrate: %g\";echo;showconsole;echo\"Time: %s\";echo;bench_end;echo;echo\"----------------------------\";echo;echo",
-		( i ? "Benchmark finished." :
+		( bAuto ? "Benchmark finished." :
 		"Stopped benchmark." ),
 		g_szMapName,
 		g_flTickrate,
 		szOutTime ));
 	ClientCommand("developer " + m_iDev);
 
-	if (i) PlaySound("Buttons.snd9");
+	if (bAuto) PlaySound("Buttons.snd9");
 	PlaySound("UIPanorama.gameover_show");
 }
 
@@ -508,14 +538,6 @@ function PostSpawn()
 		player.SetTeam(2);
 
 	PlaySound("Player.DrownStart");
-
-	for ( local i = 18; i--; ) Chat("");
-	Chat( TextColor.Uncommon + " --------------------------------" );
-	Chat("");
-	Chat(Fmt( "%s[Benchmark Script v%s]", TextColor.Achievement, version ));
-	Chat(Fmt( "%s● %sServer tickrate: %s%g", TextColor.Immortal, TextColor.Silver, TextColor.Gold, g_flTickrate ));
-	Chat("");
-	Chat( TextColor.Uncommon + " --------------------------------" );
 
 	// print after Steamworks Msg
 	if ( GetDeveloperLevel() > 0 )
@@ -550,10 +572,10 @@ function WelcomeMsg()
 	Msg("net_graph 1\n");
 	Msg("\n----------\n");
 	Msg("\n");
-	Msg("[i] The benchmark sets your fps_max to 0\n");
-	Msg("\n");
 	Msg(Fmt( "[i] Map: %s\n", g_szMapName ));
-	Msg(Fmt( "[i] Server tickrate: %g\n\n\n", g_flTickrate ));
+	Msg(Fmt( "[i] Server tickrate: %g\n", g_flTickrate ));
+	Msg("\n");
+	Msg("[i] The benchmark sets your fps_max to 0\n\n\n");
 
 	if ( !VS.IsInteger( 128.0 / g_flTickrate ) )
 	{
@@ -874,26 +896,41 @@ function Dispatch( v, i ) :
 
 function SpawnFlash( v, d )
 {
+	if ( m_bLooping && m_nPlaybackIdx )
+		d -= 3.5;
+
 	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kFlash], null, player );
 }
 
 function SpawnHE( v, d )
 {
+	if ( m_bLooping && m_nPlaybackIdx )
+		d -= 3.5;
+
 	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kHE], null, player );
 }
 
 function SpawnMolotov( v, d )
 {
+	if ( m_bLooping && m_nPlaybackIdx )
+		d -= 3.5;
+
 	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kMolotov], null, player );
 }
 
 function SpawnSmoke( v, d )
 {
+	if ( m_bLooping && m_nPlaybackIdx )
+		d -= 3.5;
+
 	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kSmoke], null, player );
 }
 
 function SpawnExplosion( v, d )
 {
+	if ( m_bLooping && m_nPlaybackIdx )
+		d -= 3.5;
+
 	VS.EventQueue.AddEvent( Dispatch, d, [this,v,kExplosion], null, player );
 }
 
