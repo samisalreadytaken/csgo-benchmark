@@ -8,7 +8,7 @@ By default, map data available for:
 \- `de_cache` <sup>(50 seconds)</sup>  
 
 
-[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.6-informational
+[ver]: https://img.shields.io/badge/csgo--benchmark-v1.4.7-informational
 
 ![](../assets/image.jpg)
 
@@ -25,19 +25,17 @@ This only adds 6 files to your `/csgo/` folder. It does not overwrite any game f
 ### Downloading
 Manually download the repository ([`Code > Download ZIP`](https://github.com/samisalreadytaken/csgo-benchmark/archive/master.zip)), then extract the folder.
 
-<details><summary>Alternative methods</summary>
+Alternatively run the installation script of your choice:
 
-**Method 2.**
-On Windows 10 17063 or later, run the [`install_csgo-benchmark.bat`](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat) file to automatically download the script into your game files.
-
-**Method 3.**
-In bash, after changing the directory below to your Steam game library directory, use the following commands to install the script into your game files.
+- [Batch](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat) <sub>NOTE: `curl` and `tar` are included in Windows 10 since 17063.</sub>
 ```
-cd "C:/Program Files/Steam/steamapps/common/Counter-Strike Global Offensive/" &&
-curl https://codeload.github.com/samisalreadytaken/csgo-benchmark/tar.gz/master | tar -xz --strip=1 csgo-benchmark-master/csgo
+curl -s https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat > install_csgo-benchmark.bat && cmd /C install_csgo-benchmark.bat && del install_csgo-benchmark.bat
 ```
 
-</details>
+- [Shell](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.sh)
+```
+sh <(curl -s https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.sh)
+```
 
 ## Usage
 Use the console commands to load and control the script. It needs to be loaded it each time the map is changed.
