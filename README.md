@@ -27,14 +27,14 @@ Manually download the repository ([`Code > Download ZIP`](https://github.com/sam
 
 Alternatively run the installation script of your choice:
 
-- [Batch](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat) <sub>NOTE: `curl` and `tar` are included in Windows 10 since 17063.</sub>
+- [Batch](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install.bat) <sub>NOTE: `curl` and `tar` are included in Windows 10 since 17063.</sub>
 ```
-curl -s https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.bat > install_csgo-benchmark.bat && cmd /C install_csgo-benchmark.bat && del install_csgo-benchmark.bat
+curl -s https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install.bat > install_csgo-benchmark.bat && cmd /C install_csgo-benchmark.bat && del install_csgo-benchmark.bat
 ```
 
-- [Shell](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.sh)
+- [Shell](https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install.sh)
 ```
-sh <(curl -s https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install_csgo-benchmark.sh)
+sh <(curl -s https://raw.githubusercontent.com/samisalreadytaken/csgo-benchmark/master/install.sh)
 ```
 
 ## Usage
