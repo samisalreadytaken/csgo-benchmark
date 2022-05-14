@@ -387,7 +387,7 @@ function ToggleCounter( i = null )
 VS.OnTimer( m_hThink, function()
 {
 	local pt = m_PathData[m_nPlaybackIdx];
-	m_hCam.SetOrigin( pt.origin );
+	m_hCam.SetAbsOrigin( pt.origin );
 
 	local a = pt.angles;
 	m_hCam.SetAngles( a.x, a.y, a.z );
