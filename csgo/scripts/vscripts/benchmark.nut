@@ -369,7 +369,7 @@ function ToggleCounter( i = null )
 
 		m_hCounter = VS.Timer( 1, 1, function()
 		{
-			Hint( ++m_nCounterCount );
+			Hint( "" + (++m_nCounterCount) );
 			PlaySound("UIPanorama.container_countdown");
 		}, this, 0, 1 ).weakref();
 	};
